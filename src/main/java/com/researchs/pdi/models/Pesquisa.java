@@ -1,11 +1,26 @@
 package com.researchs.pdi.models;
 
-import javax.persistence.*;
-import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
 @Table(name = "Pesquisa")
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@Builder
 public class Pesquisa {
 
     @Id
@@ -13,29 +28,12 @@ public class Pesquisa {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    @Setter
     @Column(name = "DESCRICAO")
     private String descricao;
 
+    @Setter
     @Column(name = "DATA")
     private Date data;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Date getData() {
-        return data;
-    }
-
-    public void setData(Date data) {
-        this.data = data;
-    }
 }

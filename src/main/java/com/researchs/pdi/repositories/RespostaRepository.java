@@ -20,5 +20,4 @@ public interface RespostaRepository extends JpaRepository<Resposta, Integer> {
                    " WHERE P.PESQUISA = ?1", nativeQuery = true)
     List<Resposta> findByPesquisa(Pesquisa pesquisa);
 
-    Resposta findById(Integer id);
 }

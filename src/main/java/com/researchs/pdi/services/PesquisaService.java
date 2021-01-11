@@ -2,39 +2,33 @@ package com.researchs.pdi.services;
 
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.repositories.PesquisaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class PesquisaService {
 
-    @Autowired
-    private PesquisaRepository pesquisaRepository;
+    private final PesquisaRepository pesquisaRepository;
+    private final EntrevistadoService entrevistadoService;
+    private final RespostaService respostaService;
+    private final PerguntaService perguntaService;
+    private final FolhaService folhaService;
 
-    @Autowired
-    private EntrevistadoService entrevistadoService;
-
-    @Autowired
-    private RespostaService respostaService;
-
-    @Autowired
-    private PerguntaService perguntaService;
-
-    @Autowired
-    private FolhaService folhaService;
-
+    @Transactional
     public Pesquisa novo(String descricao, Date data) {
         valida(descricao, data);
 
-        Pesquisa pesquisa = new Pesquisa();
-        pesquisa.setDescricao(descricao);
-        pesquisa.setData(data);
+        Pesquisa pesquisa = Pesquisa.builder()
+                .descricao(descricao)
+                .data(data)
+                .build();
 
-        return pesquisaRepository.saveAndFlush(pesquisa);
+        return pesquisaRepository.save(pesquisa);
     }
 
     private void valida(String descricao, Date data) {
@@ -42,6 +36,7 @@ public class PesquisaService {
             throw new RuntimeException("Pesquisa já cadastrada");
     }
 
+    @Transactional
     public Pesquisa atualizar(Pesquisa pesquisa) {
         return pesquisaRepository.saveAndFlush(pesquisa);
     }
@@ -62,6 +57,7 @@ public class PesquisaService {
         return pesquisaRepository.findByData(data);
     }
 
+    @Transactional
     public Pesquisa atualizar(Pesquisa pesquisa, String descricao, Date data) {
         valida(pesquisa, descricao, data);
         pesquisa.setDescricao(descricao);
@@ -75,6 +71,7 @@ public class PesquisaService {
             throw new RuntimeException("Pesquisa já cadastrada");
     }
 
+    @Transactional
     public void apagarTodasAsPesquisas() {
         for (Pesquisa pesquisa : pesquisa()) {
             entrevistadoService.apagar(pesquisa);
@@ -87,6 +84,6 @@ public class PesquisaService {
     }
 
     public Pesquisa pesquisa(Integer idPesquisa) {
-        return pesquisaRepository.findById(idPesquisa);
+        return pesquisaRepository.findById(idPesquisa).orElse(null);
     }
 }

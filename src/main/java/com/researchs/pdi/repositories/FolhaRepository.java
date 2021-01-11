@@ -19,5 +19,4 @@ public interface FolhaRepository extends JpaRepository<Folha, Integer> {
 
     Folha findByPesquisaAndNumero(Pesquisa pesquisa, Integer numero);
 
-    Folha findById(Integer id);
 }

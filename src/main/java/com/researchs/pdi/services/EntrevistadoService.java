@@ -2,45 +2,45 @@ package com.researchs.pdi.services;
 
 import com.researchs.pdi.dto.EntrevistadoDTO;
 import com.researchs.pdi.dto.EntrevistadoPerguntaRespostaDTO;
-import com.researchs.pdi.dto.EntrevistadoReceiveDTO;
-import com.researchs.pdi.models.*;
+import com.researchs.pdi.models.Entrevistado;
+import com.researchs.pdi.models.Folha;
+import com.researchs.pdi.models.Pergunta;
+import com.researchs.pdi.models.Pesquisa;
+import com.researchs.pdi.models.Resposta;
 import com.researchs.pdi.repositories.EntrevistadoRepository;
-import com.researchs.pdi.rest.SendPesquisa;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class EntrevistadoService {
 
-    @Autowired
-    private PerguntaService perguntaService;
-
-    @Autowired
-    private PesquisaService pesquisaService;
-
-    @Autowired
-    private FolhaService folhaService;
-
-    @Autowired
-    private RespostaService respostaService;
-
-    @Autowired
-    private EntrevistadoRepository entrevistadoRepository;
+    private final PerguntaService perguntaService;
+    private final FolhaService folhaService;
+    private final RespostaService respostaService;
+    private final EntrevistadoRepository entrevistadoRepository;
 
     public void novo(Pesquisa pesquisa, EntrevistadoDTO entrevistadoDTO) {
         valida(pesquisa, entrevistadoDTO);
 
         for (EntrevistadoPerguntaRespostaDTO resposta: entrevistadoDTO.getRespostas())  {
-            Entrevistado entrevistado = new Entrevistado();
-            entrevistado.setPesquisa(pesquisa);
-            entrevistado.setFolha(entrevistadoDTO.getFolha());
-            entrevistado.setPergunta(resposta.getPergunta());
-            entrevistado.setResposta(resposta.getResposta());
+            Entrevistado entrevistado = Entrevistado.builder()
+                    .pesquisa(pesquisa)
+                    .folha(entrevistadoDTO.getFolha())
+                    .pergunta(resposta.getPergunta())
+                    .resposta(resposta.getResposta())
+                    .build();
 
             entrevistadoRepository.saveAndFlush(entrevistado);
         }
+    }
+
+    @Transactional
+    public Entrevistado novo(Entrevistado entrevistado) {
+        return entrevistadoRepository.save(entrevistado);
     }
 
     public List<Entrevistado> pesquisa(Pesquisa pesquisa) {
@@ -64,21 +64,10 @@ public class EntrevistadoService {
             entrevistadoRepository.delete(entrevistado);
     }
 
-    public Entrevistado salvar(EntrevistadoReceiveDTO entrevistado) throws Exception {
-        Pesquisa pesquisa = pesquisaService.pesquisa(entrevistado.getPesquisa());
-        Folha folha = folhaService.pesquisa(entrevistado.getFolha());
-        Pergunta pergunta = perguntaService.pesquisa(entrevistado.getPergunta());
-        Resposta resposta = respostaService.pesquisa(entrevistado.getResposta());
-
-        valida(pesquisa, folha, pergunta, resposta);
-
-        Entrevistado e = new Entrevistado();
-        e.setPesquisa(pesquisa);
-        e.setFolha(folha);
-        e.setPergunta(pergunta);
-        e.setResposta(resposta);
-
-        return entrevistadoRepository.saveAndFlush(e);
+    @Transactional
+    public Entrevistado salvar(Entrevistado entrevistado) throws Exception {
+        valida(entrevistado.getPesquisa(), entrevistado.getFolha(), entrevistado.getPergunta(), entrevistado.getResposta());
+        return entrevistadoRepository.save(entrevistado);
     }
 
     private void valida(Pesquisa pesquisa, Folha folha, Pergunta pergunta, Resposta resposta) throws Exception {
@@ -94,4 +83,5 @@ public class EntrevistadoService {
         if (resposta == null)
             throw new Exception("Resposta não encontrada");
     }
+
 }

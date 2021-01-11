@@ -7,7 +7,6 @@ import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.models.Resposta;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,10 +51,11 @@ public class TemplatePesquisa {
     }
 
     private Pergunta setPergunta(Integer numero, String descricao) {
-        Pergunta pergunta = new Pergunta();
-        pergunta.setPesquisa(pesquisa);
-        pergunta.setNumero(numero);
-        pergunta.setDescricao(descricao);
+        Pergunta pergunta = Pergunta.builder()
+                .pesquisa(pesquisa)
+                .numero(numero)
+                .descricao(descricao)
+                .build();
         return pergunta;
     }
 

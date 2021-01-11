@@ -1,6 +1,21 @@
 package com.researchs.pdi.models;
 
-import javax.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "ENTREVISTADO",
@@ -12,6 +27,10 @@ import javax.persistence.*;
                 )
         }
 )
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@Builder
 public class Entrevistado {
 
     @Id
@@ -35,39 +54,4 @@ public class Entrevistado {
     @JoinColumn(name = "RESPOSTA")
     private Resposta resposta;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public Pesquisa getPesquisa() {
-        return pesquisa;
-    }
-
-    public void setPesquisa(Pesquisa pesquisa) {
-        this.pesquisa = pesquisa;
-    }
-
-    public Folha getFolha() {
-        return folha;
-    }
-
-    public void setFolha(Folha folha) {
-        this.folha = folha;
-    }
-
-    public Resposta getResposta() {
-        return resposta;
-    }
-
-    public void setResposta(Resposta resposta) {
-        this.resposta = resposta;
-    }
-
-    public Pergunta getPergunta() {
-        return pergunta;
-    }
-
-    public void setPergunta(Pergunta pergunta) {
-        this.pergunta = pergunta;
-    }
 }

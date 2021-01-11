@@ -1,22 +1,23 @@
 package com.researchs.pdi.rest;
 
-import com.researchs.pdi.JwtFilter;
+import com.researchs.pdi.config.JwtFilter;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletException;
 import java.util.Date;
 
 @RestController
 @RequestMapping("/login")
 public class AutenticacaoRest {
 
+    @ApiOperation("Use qualquer usuário e senha. A API vai criar este usuário para você poder testar as Entrevistas")
     @RequestMapping(method = RequestMethod.POST)
-    public LoginResponse login(@RequestBody LoginRequest login) throws ServletException {
+    public LoginResponse login(@RequestBody LoginRequest login) {
         Perfil perfil = new Perfil(
                                     login.usuario,
                                     login.senha);

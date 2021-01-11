@@ -1,4 +1,4 @@
-package com.researchs.pdi;
+package com.researchs.pdi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

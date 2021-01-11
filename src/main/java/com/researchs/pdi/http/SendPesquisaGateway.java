@@ -1,73 +1,71 @@
-package com.researchs.pdi.services;
+package com.researchs.pdi.http;
 
+import com.researchs.pdi.dto.EntrevistadoReceiveDTO;
 import com.researchs.pdi.dto.PerguntasERespostasDTO;
 import com.researchs.pdi.dto.PesquisaDTO;
+import com.researchs.pdi.models.Entrevistado;
 import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
-import com.researchs.pdi.models.Resposta;
-import com.researchs.pdi.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.researchs.pdi.services.EntrevistadoService;
+import com.researchs.pdi.services.FolhaService;
+import com.researchs.pdi.services.PerguntaService;
+import com.researchs.pdi.services.PesquisaService;
+import com.researchs.pdi.services.RespostaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.researchs.pdi.utils.DateUtils.getDate;
 import static com.researchs.pdi.utils.DateUtils.getParse;
 
-@Service
-public class ConsultaService {
+@RequiredArgsConstructor
+@Component
+public class SendPesquisaGateway {
 
-    public static final String PESQUISA = "PESQUISA TESTE";
-    public static final Date DATA = getDate(getParse("20/11/2016"));
+    private static final String PESQUISA = "PESQUISA TESTE";
+    private static final Date DATA = getDate(getParse("20/11/2016"));
 
-    @Autowired
-    private PesquisaService pesquisaService;
-
-    @Autowired
-    private PerguntaService perguntaService;
-
-    @Autowired
-    private RespostaService respostaService;
-
-    @Autowired
-    private FolhaService folhaService;
+    private final PesquisaService pesquisaService;
+    private final PerguntaService perguntaService;
+    private final RespostaService respostaService;
+    private final FolhaService folhaService;
+    private final EntrevistadoService entrevistadoService;
 
     public PesquisaDTO getEstruturaBasica(HttpServletRequest request) {
         Pesquisa pesquisa = pesquisaService.pesquisa(PESQUISA, DATA);
-        return getPesquisaDTO(perguntaService, respostaService, folhaService, pesquisa);
+        return getPesquisaDTO(pesquisa);
     }
 
-    private PesquisaDTO getPesquisaDTO(PerguntaService perguntaService, RespostaService respostaService, FolhaService folhaService, Pesquisa pesquisa) {
-        PesquisaDTO pesquisaDTO = new PesquisaDTO();
-        pesquisaDTO.setPesquisa(pesquisa);
-        pesquisaDTO.setPerguntasERespostas(getPerguntasERespostas(perguntaService, respostaService, pesquisa));
-        pesquisaDTO.setFolhas(folhaService.pesquisa(pesquisa));
-        return pesquisaDTO;
+    private PesquisaDTO getPesquisaDTO(Pesquisa pesquisa) {
+        return PesquisaDTO.builder()
+                .pesquisa(pesquisa)
+                .perguntasERespostas(getPerguntasERespostas(pesquisa))
+                .folhas(folhaService.pesquisa(pesquisa))
+                .build();
     }
 
-    private ArrayList<PerguntasERespostasDTO> getPerguntasERespostas(PerguntaService perguntaService, RespostaService respostaService, Pesquisa pesquisa) {
-        ArrayList<PerguntasERespostasDTO> perguntasERespostas = new ArrayList<>();
-
-        for (Pergunta pergunta: perguntaService.pesquisa(pesquisa)) {
-            List<Resposta> respostas = respostaService.pesquisa(pergunta);
-
-            PerguntasERespostasDTO perguntasERespostasDTO = new PerguntasERespostasDTO();
-            perguntasERespostasDTO.setPergunta(pergunta);
-            perguntasERespostasDTO.setRespostas(respostas);
-
-            perguntasERespostas.add(perguntasERespostasDTO);
-        }
-        return perguntasERespostas;
+    private ArrayList<PerguntasERespostasDTO> getPerguntasERespostas(Pesquisa pesquisa) {
+        return perguntaService.pesquisa(pesquisa)
+                .stream()
+                .map(this::build)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public PesquisaDTO initDB(HttpServletRequest request) {
+    private PerguntasERespostasDTO build(Pergunta pergunta) {
+        return PerguntasERespostasDTO.builder()
+                .pergunta(pergunta)
+                .respostas(respostaService.pesquisa(pergunta))
+                .build();
+    }
+
+    public void initDB(HttpServletRequest request) {
         pesquisaService.apagarTodasAsPesquisas();
 
-        Pesquisa pesquisa = pesquisaService.novo("PESQUISA TESTE", getDate(getParse("20/11/2016")));
+        Pesquisa pesquisa = pesquisaService.novo(PESQUISA, getDate(getParse("20/11/2016")));
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 21 anos");
         respostaService.novo(pergunta, "b", "Entre 22 e 28 anos");
@@ -119,7 +117,20 @@ public class ConsultaService {
         respostaService.novo(pergunta, "e", "Nenhum / Não sabe / Não opinou");
 
         folhaService.criarFolhas(pesquisa, 3);
-
-        return null;
     }
+
+    public void salvar(EntrevistadoReceiveDTO dto) throws Exception {
+        final Pesquisa pesquisa = pesquisaService.pesquisa(dto.getPesquisa());
+        entrevistadoService.salvar(build(dto, pesquisa));
+    }
+
+    private Entrevistado build(EntrevistadoReceiveDTO dto, Pesquisa pesquisa) {
+        return Entrevistado.builder()
+                .pesquisa(pesquisa)
+                .folha(folhaService.pesquisa(pesquisa, dto.getFolha()))
+                .pergunta(perguntaService.pesquisa(pesquisa, dto.getPergunta()))
+                .resposta(respostaService.pesquisa(pesquisa, dto.getPergunta(), dto.getOpcaoResposta()))
+                .build();
+    }
+
 }

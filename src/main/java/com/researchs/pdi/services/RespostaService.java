@@ -3,21 +3,18 @@ package com.researchs.pdi.services;
 import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.models.Resposta;
-import com.researchs.pdi.repositories.PerguntaRepository;
 import com.researchs.pdi.repositories.RespostaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class RespostaService {
 
-    @Autowired
-    private PerguntaService perguntaService;
-
-    @Autowired
-    private RespostaRepository respostaRepository;
+    private final PerguntaService perguntaService;
+    private final RespostaRepository respostaRepository;
 
     public List<Resposta> pesquisa() {
         return respostaRepository.findAll();
@@ -26,10 +23,11 @@ public class RespostaService {
     public Resposta novo(Pergunta pergunta, String opcao, String descricao) {
         valida(pergunta, opcao, descricao);
 
-        Resposta resposta = new Resposta();
-        resposta.setPergunta(pergunta);
-        resposta.setOpcao(opcao);
-        resposta.setDescricao(descricao);
+        Resposta resposta = Resposta.builder()
+                .pergunta(pergunta)
+                .opcao(opcao)
+                .descricao(descricao)
+                .build();
 
         return respostaRepository.saveAndFlush(resposta);
     }
@@ -67,6 +65,6 @@ public class RespostaService {
     }
 
     public Resposta pesquisa(Integer idResposta) {
-        return respostaRepository.findById(idResposta);
+        return respostaRepository.findById(idResposta).orElse(null);
     }
 }

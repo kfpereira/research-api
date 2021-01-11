@@ -1,4 +1,4 @@
-package com.researchs.pdi;
+package com.researchs.pdi.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

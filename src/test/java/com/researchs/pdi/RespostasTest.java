@@ -1,74 +1,79 @@
 package com.researchs.pdi;
 
+import com.researchs.pdi.config.FunctionalTest;
 import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.models.Resposta;
 import com.researchs.pdi.services.PerguntaService;
 import com.researchs.pdi.services.PesquisaService;
 import com.researchs.pdi.services.RespostaService;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
 import java.util.List;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @FunctionalTest
-public class RespostasTest {
-    @Autowired
-    private PesquisaService pesquisaService;
+class RespostasTest {
+
+    private final PesquisaService pesquisaService;
+    private final PerguntaService perguntaService;
+    private final RespostaService respostaService;
 
     @Autowired
-    private PerguntaService perguntaService;
+    RespostasTest(PesquisaService pesquisaService,
+                  PerguntaService perguntaService,
+                  RespostaService respostaService) {
 
-    @Autowired
-    private RespostaService respostaService;
+        this.pesquisaService = pesquisaService;
+        this.perguntaService = perguntaService;
+        this.respostaService = respostaService;
+    }
 
     @Test
-    public void deveriaExistirUmaRespostaCadastrada() {
+    void deveriaExistirUmaRespostaCadastrada() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
 
         List<Resposta> all = respostaService.pesquisa();
-        Assert.assertEquals("Deveria existir uma resposta", 1, all.size());
+        assertEquals(1, all.size(), "Deveria existir uma resposta");
     }
 
     @Test
-    public void deveriamExistirDuasRespostasCadastradas() {
+    void deveriamExistirDuasRespostasCadastradas() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
         respostaService.novo(pergunta, "b", "Entre 24 e 29 anos");
 
         List<Resposta> all = respostaService.pesquisa();
-        Assert.assertEquals("Deveriam existir duas respostas", 2, all.size());
+        assertEquals(2, all.size(), "Deveriam existir duas respostas");
     }
 
     @Test
-    public void naoPermitirCadastrarDuasRespostasDeMesmaOpcaoParaAMesmaPergunta() {
+    void naoPermitirCadastrarDuasRespostasDeMesmaOpcaoParaAMesmaPergunta() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
 
-        String msg = null;
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
-        try {
-            respostaService.novo(pergunta, "a", "Entre 24 e 29 anos");
-        }
-        catch (RuntimeException e) {
-            msg = e.getMessage();
-        }
-        Assert.assertNotNull("Deveria ter uma mensagem de erro", msg);
+
+        assertThrows(
+                RuntimeException.class,
+                () -> respostaService.novo(pergunta, "a", "Entre 24 e 29 anos"),
+                "Deveria ter uma mensagem de erro"
+        );
 
         List<Resposta> all = respostaService.pesquisa();
-        Assert.assertEquals("Deveria existir uma resposta", 1, all.size());
+        assertEquals(1, all.size(), "Deveria existir uma resposta");
     }
 
     @Test
-    public void permitirCadastrarDuasRespostasDeMesmaOpcaoParaPerguntasDiferentes() {
+    void permitirCadastrarDuasRespostasDeMesmaOpcaoParaPerguntasDiferentes() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta1 = perguntaService.novo(pesquisa, 1, "Nota Opcao A");
         respostaService.novo(pergunta1, "a", "1");
@@ -85,11 +90,11 @@ public class RespostasTest {
         respostaService.novo(pergunta2, "e", "5");
 
         List<Resposta> all = respostaService.pesquisa();
-        Assert.assertEquals("Deveria existir 10 respostas", 10, all.size());
+        assertEquals(10, all.size(), "Deveria existir 10 respostas");
     }
 
     @Test
-    public void permitirAtualizarResposta() {
+    void permitirAtualizarResposta() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
@@ -100,11 +105,11 @@ public class RespostasTest {
         respostaService.atualizar(resposta);
 
         Resposta respostaAssert = respostaService.pesquisa(pesquisa, 1, "b");
-        Assert.assertEquals("Descrição resposta", "Entre 24 e 39 anos", respostaAssert.getDescricao());
+        assertEquals("Entre 24 e 39 anos", respostaAssert.getDescricao(), "Descrição resposta");
     }
 
     @Test
-    public void naoPermitirAtualizarRespostaParaOpcaoExistente() {
+    void naoPermitirAtualizarRespostaParaOpcaoExistente() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
@@ -120,19 +125,19 @@ public class RespostasTest {
         catch (RuntimeException e) {
             msg = e.getMessage();
         }
-        Assert.assertNotNull("Deveria ter dado erro", msg);
+        assertNotNull(msg);
     }
 
     @Test
-    public void consultarRespostaPelaOpcao() {
+    void consultarRespostaPelaOpcao() {
         Pesquisa pesquisa = pesquisaService.novo("Pesquisa Teste", new Date());
         Pergunta pergunta = perguntaService.novo(pesquisa, 1, "Faixa etária");
         respostaService.novo(pergunta, "a", "Entre 16 e 23 anos");
         respostaService.novo(pergunta, "b", "Entre 24 e 29 anos");
 
         Resposta resposta = respostaService.pesquisa(pesquisa, 1, "b");
-        Assert.assertEquals("Opção resposta", "b", resposta.getOpcao());
-        Assert.assertEquals("Pergunta resposta", "Faixa etária", resposta.getPergunta().getDescricao());
+        assertEquals("b", resposta.getOpcao());
+        assertEquals("Faixa etária", resposta.getPergunta().getDescricao());
     }
 
 }

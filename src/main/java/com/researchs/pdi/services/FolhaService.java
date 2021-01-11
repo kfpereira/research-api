@@ -4,21 +4,22 @@ package com.researchs.pdi.services;
 import com.researchs.pdi.models.Folha;
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.repositories.FolhaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class FolhaService {
 
-    @Autowired
-    private FolhaRepository folhaRepository;
+    private final FolhaRepository folhaRepository;
 
     public Folha novo(Pesquisa pesquisa, int numero) {
-        Folha folha = new Folha();
-        folha.setNumero(numero);
-        folha.setPesquisa(pesquisa);
+        Folha folha = Folha.builder()
+                .numero(numero)
+                .pesquisa(pesquisa)
+                .build();
         return folhaRepository.saveAndFlush(folha);
     }
 
@@ -58,6 +59,6 @@ public class FolhaService {
     }
 
     public Folha pesquisa(Integer idFolha) {
-        return folhaRepository.findById(idFolha);
+        return folhaRepository.findById(idFolha).orElse(null);
     }
 }

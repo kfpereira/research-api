@@ -14,5 +14,4 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Integer> {
 
     List<Pergunta> findByPesquisa(Pesquisa pesquisa);
 
-    Pergunta findById(Integer id);
 }

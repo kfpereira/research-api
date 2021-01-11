@@ -1,45 +1,51 @@
 package com.researchs.pdi;
 
+import com.researchs.pdi.config.FunctionalTest;
 import com.researchs.pdi.dto.PesquisaDTO;
 import com.researchs.pdi.entrevistado.TemplatePesquisa;
+import com.researchs.pdi.http.SendPesquisaGateway;
 import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
-import com.researchs.pdi.services.*;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.researchs.pdi.services.FolhaService;
+import com.researchs.pdi.services.PerguntaService;
+import com.researchs.pdi.services.PesquisaService;
+import com.researchs.pdi.services.RespostaService;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
 
 import static com.researchs.pdi.entrevistado.TemplatePesquisa.resposta;
 import static com.researchs.pdi.utils.DateUtils.getDate;
 import static com.researchs.pdi.utils.DateUtils.getParse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @FunctionalTest
-public class ConsultaServiceTest {
+class ConsultaServiceTest {
 
     public static final Date DATA_PADRAO = getDate(getParse("20/11/2016"));
 
-    @Autowired
-    private PesquisaService pesquisaService;
+    private final PesquisaService pesquisaService;
+    private final PerguntaService perguntaService;
+    private final RespostaService respostaService;
+    private final FolhaService folhaService;
+    private final SendPesquisaGateway service;
 
     @Autowired
-    private PerguntaService perguntaService;
-
-    @Autowired
-    private RespostaService respostaService;
-
-    @Autowired
-    private FolhaService folhaService;
-
-    @Autowired
-    private ConsultaService service;
+    ConsultaServiceTest(PesquisaService pesquisaService,
+                        PerguntaService perguntaService,
+                        RespostaService respostaService,
+                        FolhaService folhaService,
+                        SendPesquisaGateway service) {
+        this.pesquisaService = pesquisaService;
+        this.perguntaService = perguntaService;
+        this.respostaService = respostaService;
+        this.folhaService = folhaService;
+        this.service = service;
+    }
 
     @Test
-    public void deveriaRetornarPesquisaMontada() {
+    void deveriaRetornarPesquisaMontada() {
         getEnvironmentDeTresFolhasDePesquisa();
 
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
@@ -69,7 +75,7 @@ public class ConsultaServiceTest {
     }
 
     @Test
-    public void deveriaRetornarPesquisaDiferente() {
+    void deveriaRetornarPesquisaDiferente() {
         getEnvironmentDeTresFolhasDePesquisa();
 
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
@@ -103,11 +109,11 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Pesquisa Esperada:Pesquisa Homologação Errada\nPesquisa Retornada: PESQUISA TESTE";
-        Assert.assertEquals("Pesquisas Diferentes", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Pesquisas Diferentes");
     }
 
     @Test
-    public void deveriaRetornarFolhaNaoEncontrada() {
+    void deveriaRetornarFolhaNaoEncontrada() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -141,11 +147,11 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Quantidade de Folhas diferentes. Esperado: 4 - Atual: 3";
-        Assert.assertEquals("Folha não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Folha não esperada");
     }
 
     @Test
-    public void deveriaRetornarFolhaNaoEncontradaInverso() {
+    void deveriaRetornarFolhaNaoEncontradaInverso() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -179,11 +185,11 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Quantidade de Folhas diferentes. Esperado: 2 - Atual: 3";
-        Assert.assertEquals("Folha não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Folha não esperada");
     }
 
     @Test
-    public void deveriaRetornarPerguntaNaoEncontrada() {
+    void deveriaRetornarPerguntaNaoEncontrada() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -220,11 +226,11 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Pergunta Pergunta não existente deveria existir.";
-        Assert.assertEquals("Pergunta não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Pergunta não esperada");
     }
 
     @Test
-    public void deveriaRetornarPerguntaNaoEncontradaInverso() {
+    void deveriaRetornarPerguntaNaoEncontradaInverso() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -251,12 +257,12 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Pergunta Salário familiar deveria existir.";
-        Assert.assertEquals("Pergunta não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Pergunta não esperada");
     }
 
 
     @Test
-    public void deveriaRetornarRespostaNaoEncontrada() {
+    void deveriaRetornarRespostaNaoEncontrada() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -291,11 +297,11 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Resposta c da pergunta 2 não encontrada.";
-        Assert.assertEquals("Resposta não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg, "Resposta não esperada");
     }
 
     @Test
-    public void deveriaRetornarRespostaNaoEncontradaInverso() {
+    void deveriaRetornarRespostaNaoEncontradaInverso() {
         getEnvironmentDeTresFolhasDePesquisa();
         PesquisaDTO estruturaBasica = service.getEstruturaBasica(null);
 
@@ -328,7 +334,7 @@ public class ConsultaServiceTest {
         }
 
         String msgEsperada = "Resposta b da pergunta 2 não encontrada.";
-        Assert.assertEquals("Resposta não esperada", msgEsperada, msg);
+        assertEquals(msgEsperada, msg);
     }
 
     private Pesquisa getEnvironmentDeTresFolhasDePesquisa() {

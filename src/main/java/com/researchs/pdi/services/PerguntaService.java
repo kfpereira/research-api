@@ -3,24 +3,25 @@ package com.researchs.pdi.services;
 import com.researchs.pdi.models.Pergunta;
 import com.researchs.pdi.models.Pesquisa;
 import com.researchs.pdi.repositories.PerguntaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class PerguntaService {
 
-    @Autowired
-    private PerguntaRepository perguntaRepository;
+    private final PerguntaRepository perguntaRepository;
 
     public Pergunta novo(Pesquisa pesquisa, Integer numero, String descricao) {
         valida(pesquisa, numero, descricao);
 
-        Pergunta pergunta = new Pergunta();
-        pergunta.setPesquisa(pesquisa);
-        pergunta.setNumero(numero);
-        pergunta.setDescricao(descricao);
+        Pergunta pergunta = Pergunta.builder()
+                .pesquisa(pesquisa)
+                .numero(numero)
+                .descricao(descricao)
+                .build();
 
         return perguntaRepository.saveAndFlush(pergunta);
     }
@@ -57,6 +58,6 @@ public class PerguntaService {
     }
 
     public Pergunta pesquisa(Integer idPergunta) {
-        return perguntaRepository.findById(idPergunta);
+        return perguntaRepository.findById(idPergunta).orElse(null);
     }
 }

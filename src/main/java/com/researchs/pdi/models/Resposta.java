@@ -1,6 +1,22 @@
 package com.researchs.pdi.models;
 
-import javax.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "RESPOSTA",
@@ -12,6 +28,10 @@ import javax.persistence.*;
                 )
         }
 )
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@Builder
 public class Resposta {
 
     @Id
@@ -19,9 +39,11 @@ public class Resposta {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    @Setter
     @Column(name = "OPCAO")
     private String opcao;
 
+    @Setter
     @Column(name = "DESCRICAO")
     private String descricao;
 
@@ -29,31 +51,4 @@ public class Resposta {
     @JoinColumn(name = "PERGUNTA")
     private Pergunta pergunta;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public String getOpcao() {
-        return opcao;
-    }
-
-    public void setOpcao(String opcao) {
-        this.opcao = opcao;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Pergunta getPergunta() {
-        return pergunta;
-    }
-
-    public void setPergunta(Pergunta pergunta) {
-        this.pergunta = pergunta;
-    }
 }
